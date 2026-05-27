@@ -5,7 +5,6 @@ image URL validation, and scraping status tracking.
 Database-agnostic: receives a repository dict for data access.
 """
 import re
-from dataclasses import asdict
 from decimal import Decimal
 from typing import Optional, Protocol
 
