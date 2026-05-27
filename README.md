@@ -1,26 +1,26 @@
-﻿# Inventory Ops API
-> **Portfolio context:** Extracted from founder-led production systems — multi-marketplace inventory, orders, and warehouse execution. **[Full portfolio](https://github.com/AspiranteD)** · [aspiranted.github.io](https://aspiranted.github.io)
+# Inventory Ops API
+> **Portfolio context:** Extracted from founder-led production systems � multi-marketplace inventory, orders, and warehouse execution. **[Full portfolio](https://github.com/AspiranteD/AspiranteD)** � [aspiranted.github.io](https://aspiranted.github.io)
 
-Production-grade **inventory & operations domain layer** from a full-scale ERP: 6 entity models and 6 services with business rules, side effects, and aggregations — the data backbone behind a **40,000+** reference inventory across multiple marketplaces.
+Production-grade **inventory & operations domain layer** from a full-scale ERP: 6 entity models and 6 services with business rules, side effects, and aggregations � the data backbone behind a **40,000+** reference inventory across multiple marketplaces.
 
 ## Architecture
 
 ```
 src/
-├── models/
-│   ├── item.py          # PhysicalItem with scraping auto-pause, condition validation
-│   ├── sale.py          # Sale with computed amount_due, in_person/online constraints
-│   ├── order.py         # Order + OrderItem with warehouse state pipeline
-│   ├── incident.py      # Post-sale incidents with pending return data
-│   ├── listing.py       # Marketplace listings with stat accumulation, oscillation detection
-│   └── expense.py       # Expenses with recurring support, payment status constraints
-└── services/
-    ├── inventory_service.py  # CRUD with side effects and business validation
-    ├── sale_service.py       # Sale creation marks items unavailable, return data application
-    ├── dashboard_service.py  # Multi-table aggregation for stats and daily reports
-    ├── search_service.py     # Cross-table global search (items, sales, orders)
-    ├── batch_service.py      # Bulk warehouse location updates
-    └── export_service.py     # CSV/JSON inventory export
++-- models/
+�   +-- item.py          # PhysicalItem with scraping auto-pause, condition validation
+�   +-- sale.py          # Sale with computed amount_due, in_person/online constraints
+�   +-- order.py         # Order + OrderItem with warehouse state pipeline
+�   +-- incident.py      # Post-sale incidents with pending return data
+�   +-- listing.py       # Marketplace listings with stat accumulation, oscillation detection
+�   +-- expense.py       # Expenses with recurring support, payment status constraints
++-- services/
+    +-- inventory_service.py  # CRUD with side effects and business validation
+    +-- sale_service.py       # Sale creation marks items unavailable, return data application
+    +-- dashboard_service.py  # Multi-table aggregation for stats and daily reports
+    +-- search_service.py     # Cross-table global search (items, sales, orders)
+    +-- batch_service.py      # Bulk warehouse location updates
+    +-- export_service.py     # CSV/JSON inventory export
 ```
 
 ## Key Technical Features
