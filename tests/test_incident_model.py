@@ -1,6 +1,6 @@
 """Tests for Incident model."""
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from src.models.incident import Incident, INCIDENT_TYPES, INCIDENT_STATUSES
 
@@ -64,7 +64,7 @@ def test_has_pending_return_false_applied():
 
 
 def test_has_pending_return_false_not_received():
-    inc = _incident(pending_condition_id=2, not_received_at=datetime.utcnow())
+    inc = _incident(pending_condition_id=2, not_received_at=datetime.now(timezone.utc))
     assert not inc.has_pending_return
 
 

@@ -1,6 +1,6 @@
 """Tests for Order and OrderItem models."""
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from src.models.order import Order, OrderItem, MAX_EXTRACTION_ATTEMPTS
 
@@ -27,7 +27,7 @@ def test_validate_due_before_order():
 def test_is_overdue_true():
     o = _order(
         active=True,
-        due_date=datetime.utcnow() - timedelta(hours=1),
+        due_date=datetime.now(timezone.utc) - timedelta(hours=1),
     )
     assert o.is_overdue
 
@@ -35,7 +35,7 @@ def test_is_overdue_true():
 def test_is_overdue_false_inactive():
     o = _order(
         active=False,
-        due_date=datetime.utcnow() - timedelta(hours=1),
+        due_date=datetime.now(timezone.utc) - timedelta(hours=1),
     )
     assert not o.is_overdue
 
@@ -48,7 +48,7 @@ def test_is_overdue_false_no_date():
 def test_is_overdue_false_future():
     o = _order(
         active=True,
-        due_date=datetime.utcnow() + timedelta(days=1),
+        due_date=datetime.now(timezone.utc) + timedelta(days=1),
     )
     assert not o.is_overdue
 

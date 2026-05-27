@@ -6,7 +6,7 @@ multiple items, each with a warehouse status tracking the fulfillment
 pipeline: BUSCAR -> ENCONTRADO -> PREPARADO -> ESPERANDO -> CANCELAR.
 """
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Optional
 
@@ -75,7 +75,7 @@ class Order:
     def is_overdue(self) -> bool:
         if not self.due_date or not self.active:
             return False
-        return datetime.utcnow() > self.due_date
+        return datetime.now(timezone.utc) > self.due_date
 
     def record_extraction_failure(self) -> None:
         """Increment extraction_attempts; auto-mark failed after MAX."""

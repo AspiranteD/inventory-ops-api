@@ -6,7 +6,7 @@ Includes pending return data fields that are applied to the item
 only when the return is physically received.
 """
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Optional
 
@@ -93,4 +93,4 @@ class Incident:
 
     def mark_not_received(self) -> None:
         """Mark that the buyer did not return the item."""
-        self.not_received_at = datetime.utcnow()
+        self.not_received_at = datetime.now(timezone.utc)

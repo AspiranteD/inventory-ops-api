@@ -6,7 +6,7 @@ product data (ASIN, description, category), pricing, condition, warehouse
 location, AI-enriched fields, and scraping status with auto-pause logic.
 """
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from decimal import Decimal
 from typing import Optional
 
@@ -80,7 +80,7 @@ class PhysicalItem:
     def increment_scraping(self) -> None:
         """Record a failed scraping attempt; auto-flag for manual review."""
         self.scraping_attempts += 1
-        self.last_scraped_at = datetime.utcnow()
+        self.last_scraped_at = datetime.now(timezone.utc)
         if self.scraping_paused:
             self.scraping_needs_manual = True
 
@@ -89,7 +89,7 @@ class PhysicalItem:
         self.scraped_price = price
         self.scraping_attempts = 0
         self.scraping_needs_manual = False
-        self.last_scraped_at = datetime.utcnow()
+        self.last_scraped_at = datetime.now(timezone.utc)
 
     def image_url_list(self) -> list[str]:
         """Parse comma-separated image_urls into a list."""
