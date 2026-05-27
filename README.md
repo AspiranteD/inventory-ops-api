@@ -1,6 +1,7 @@
-# Inventory Ops API
+﻿# Inventory Ops API
+> **Portfolio context:** Extracted from founder-led production systems — multi-marketplace inventory, orders, and warehouse execution. **[Full portfolio](https://github.com/AspiranteD)** · [aspiranted.github.io](https://aspiranted.github.io)
 
-Production-grade inventory management API extracted from a full-scale ERP system managing 10,000+ physical items across multiple marketplace platforms.
+Production-grade **inventory & operations domain layer** from a full-scale ERP: 6 entity models and 6 services with business rules, side effects, and aggregations — the data backbone behind a **40,000+** reference inventory across multiple marketplaces.
 
 ## Architecture
 
