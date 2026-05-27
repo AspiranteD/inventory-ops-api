@@ -1,48 +1,88 @@
-from datetime import datetime, date
+"""
+Order (Pedido) and OrderItem (PedidoItem) models.
+
+Orders represent shipment requests from platforms. Each order contains
+multiple items, each with a warehouse status tracking the fulfillment
+pipeline: BUSCAR -> ENCONTRADO -> PREPARADO -> ESPERANDO -> CANCELAR.
+"""
+from dataclasses import dataclass, field
+from datetime import datetime
+from decimal import Decimal
 from typing import Optional
 
-from sqlmodel import SQLModel, Field, Column, Relationship
-import sqlalchemy as sa
+
+WAREHOUSE_STATES = ["BUSCAR", "ENCONTRADO", "PREPARADO", "ESPERANDO", "CANCELAR"]
+CANCEL_STATE = "CANCELAR"
+MAX_EXTRACTION_ATTEMPTS = 3
 
 
-class OrderItem(SQLModel, table=True):
-    __tablename__ = "order_items"
+@dataclass
+class OrderItem:
+    request_id: str
+    lpn: str
+    warehouse_status_id: int
+    price: Optional[Decimal] = None
+    web_url: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
-    id: Optional[int] = Field(default=None, primary_key=True)
-    request_id: str = Field(foreign_key="orders.request_id", index=True)
-    lpn: str = Field(foreign_key="physical_items.lpn", index=True)
-    price: float = Field(default=0.0)
-    web_url: Optional[str] = Field(default=None)
-    warehouse_status_id: Optional[int] = Field(default=None)
-
-    order: Optional["Order"] = Relationship(back_populates="items")
+    def validate(self) -> list[str]:
+        errors = []
+        if self.price is not None and self.price < 0:
+            errors.append("price must be >= 0")
+        return errors
 
 
-class Order(SQLModel, table=True):
-    __tablename__ = "orders"
+@dataclass
+class Order:
+    request_id: str
+    status_id: int
+    account_id: Optional[int] = None
 
-    request_id: str = Field(primary_key=True, max_length=50)
-    account_id: Optional[str] = Field(default=None, max_length=50, index=True)
-    buyer_name: Optional[str] = Field(default=None, max_length=200)
-    buyer_hash: Optional[str] = Field(default=None, max_length=64)
-    buyer_country: Optional[str] = Field(default=None, max_length=5)
-    order_date: Optional[date] = Field(default=None, index=True)
-    due_date: Optional[date] = Field(default=None)
-    status_id: int = Field(default=1, index=True)
-    active: bool = Field(default=True)
-    shipping_code: Optional[str] = Field(default=None, max_length=100)
-    shipping_company_id: Optional[int] = Field(default=None)
-    notes: Optional[str] = Field(default=None)
-    buyer_address: Optional[str] = Field(
-        default=None, sa_column=Column(sa.Text)
-    )
-    created_at: datetime = Field(
-        default_factory=datetime.utcnow,
-        sa_column=Column(sa.DateTime, default=sa.func.now()),
-    )
-    updated_at: datetime = Field(
-        default_factory=datetime.utcnow,
-        sa_column=Column(sa.DateTime, default=sa.func.now(), onupdate=sa.func.now()),
-    )
+    buyer_name: Optional[str] = None
+    buyer_hash: Optional[str] = None
+    buyer_country: Optional[str] = None
 
-    items: list[OrderItem] = Relationship(back_populates="order")
+    order_date: Optional[datetime] = None
+    due_date: Optional[datetime] = None
+
+    shipping_company_id: Optional[int] = None
+    instructions_url: Optional[str] = None
+    shipping_label_url: Optional[str] = None
+    shipping_code: Optional[str] = None
+
+    active: bool = True
+    extraction_failed: bool = False
+    extraction_attempts: int = 0
+
+    order_name: Optional[str] = None
+    order_image: Optional[str] = None
+    handover_mode: Optional[str] = None
+    notes: Optional[str] = None
+
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    items: list[OrderItem] = field(default_factory=list)
+
+    def validate(self) -> list[str]:
+        errors = []
+        if self.due_date and self.order_date and self.due_date < self.order_date:
+            errors.append("due_date must be >= order_date")
+        return errors
+
+    @property
+    def is_overdue(self) -> bool:
+        if not self.due_date or not self.active:
+            return False
+        return datetime.utcnow() > self.due_date
+
+    def record_extraction_failure(self) -> None:
+        """Increment extraction_attempts; auto-mark failed after MAX."""
+        self.extraction_attempts += 1
+        if self.extraction_attempts >= MAX_EXTRACTION_ATTEMPTS:
+            self.extraction_failed = True
+
+    def reset_extraction(self) -> None:
+        self.extraction_attempts = 0
+        self.extraction_failed = False
